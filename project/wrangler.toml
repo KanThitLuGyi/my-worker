@@ -1,7 +1,7 @@
 name = "my-worker"
 main = "worker.js"
 compatibility_date = "2024-11-01"
-accout_id = "fe1aaedd3eab92e69d17e708278d06db
+account_id = "fe1aaedd3eab92e69d17e708278d06db"
 
 kv_namespaces = [
   { binding = "CACHE", id = "0307155c1e154e1387854542e2937b4a", preview_id = "a80ad187059046c5b3ce3b75e920521a"}
