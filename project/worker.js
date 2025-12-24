@@ -7,10 +7,10 @@ import { json } from "./src/utils/response.js";
 export default {
  
   async fetch(req, env) {
- /* const apiKey = req.headers.get("x-api-key");
+ const apiKey = req.headers.get("x-api-key");
     if (apiKey !== env.API_KEY) {
       return new Response("Unauthorized", { status: 401 });
-    }*/
+    }
     const url = new URL(req.url);
     const page = Number(url.searchParams.get("page") || 1);
     const target = url.searchParams.get("url");
