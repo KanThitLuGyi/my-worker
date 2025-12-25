@@ -6,7 +6,8 @@ export function scrapeChannels({ page, env }) {
   return scrapeList({
     url: paginateUrl(SELECTOR.channel.url, page),
     selector: SELECTOR.channel.item,
-    env
+    env,
+    page
   });
 }
 
@@ -14,6 +15,7 @@ export function scrapeChannelSection({ channelUrl, page, env }) {
   return scrapeList({
     url: paginateUrl(channelUrl, page),
     selector: SELECTOR.channel.sectionItem,
-    env
+    env,
+    page
   });
 }

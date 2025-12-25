@@ -3,8 +3,16 @@ import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
 
-export async function scrapeList({ url, selector, env }) {
-  const cacheKey = `scrape:${url}`;
+export async function scrapeList({
+  url,
+  selector,
+  env,
+  page = 1
+}) {
+  // TTL logic
+  const ttl = page <= 4 ? 21600 : 3600; // 6h : 1h
+
+  const cacheKey = `scrape:${selector}:${url}`;
   const cached = await getCache(cacheKey, env);
   if (cached) return cached;
 
@@ -30,6 +38,9 @@ export async function scrapeList({ url, selector, env }) {
     }
   });
 
-  await setCache(cacheKey, list, env);
+  if (list.length > 0) {
+    await setCache(cacheKey, list, env, ttl);
+  }
+
   return list;
 }

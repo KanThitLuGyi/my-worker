@@ -6,6 +6,7 @@ export function scrapeHome({ page, env }) {
   return scrapeList({
     url: paginateUrl(SELECTOR.home.url, page),
     selector: SELECTOR.home.item,
-    env
+    env,
+    page
   });
 }

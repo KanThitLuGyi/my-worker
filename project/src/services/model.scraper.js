@@ -6,7 +6,8 @@ export function scrapeModels({ page, env }) {
   return scrapeList({
     url: paginateUrl(SELECTOR.model.url, page),
     selector: SELECTOR.model.item,
-    env
+    env,
+    page
   });
 }
 
@@ -14,6 +15,7 @@ export function scrapeModelSection({ modelUrl, page, env }) {
   return scrapeList({
     url: paginateUrl(modelUrl, page),
     selector: SELECTOR.model.sectionItem,
-    env
+    env,
+    page
   });
 }
