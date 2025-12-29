@@ -5,14 +5,17 @@ import { getCache, setCache } from "../cache/kv.js";
 
 export async function scrapeList({
   url,
-  selector,
+  config,
   env,
   page = 1
 }) {
-  // TTL logic
-  const ttl = page <= 4 ? 21600 : 3600; // 6h : 1h
+  if (!config?.list) {
+    throw new Error("scrapeList: missing list selector");
+  }
 
-  const cacheKey = `scrape:${selector}:${url}`;
+  const ttl = page <= 3 ? 21600 : 3600;
+  const cacheKey = `scrape:${url}:p${page}`;
+
   const cached = await getCache(cacheKey, env);
   if (cached) return cached;
 
@@ -22,23 +25,35 @@ export async function scrapeList({
   const $ = cheerio.load(html);
   const list = [];
 
-  $(selector).each((_, el) => {
-    const title = $(el).find("img").attr("alt") || "";
-    const img = $(el).find("img").attr("src") || "";
-    const href = $(el).find("a").attr("href");
+  $(config.list).each((_, el) => {
+    const node = $(el);
 
-    if (href) {
-      list.push({
-        title,
-        img,
-        url: href.startsWith("http")
-          ? href
-          : `https://xhamster.com${href}`
-      });
+    const title = config.title
+      ? config.title.text
+        ? node.find(config.title.selector).text().trim()
+        : node.find(config.title.selector).attr(config.title.attr)
+      : "";
+
+    const img = config.img
+      ? node.find(config.img.selector).attr(config.img.attr)
+      : null;
+
+    let href = config.link
+      ? config.link.selector
+        ? node.find(config.link.selector).attr(config.link.attr)
+        : node.attr(config.link.attr)
+      : null;
+
+    if (!href) return;
+
+    if (!href.startsWith("http")) {
+      href = `https://xhamster.com${href}`;
     }
+
+    list.push({ title, img, url: href });
   });
 
-  if (list.length > 0) {
+  if (list.length) {
     await setCache(cacheKey, list, env, ttl);
   }
 

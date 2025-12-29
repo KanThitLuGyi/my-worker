@@ -2,10 +2,10 @@ import { SELECTOR } from "../config/selector.js";
 import { paginateUrl } from "../utils/paginateUrl.js";
 import { scrapeList } from "./generic.scraper.js";
 
-export function scrapeHome({ page, env }) {
+export function scrapeHome({ page = 1, env }) {
   return scrapeList({
     url: paginateUrl(SELECTOR.home.url, page),
-    selector: SELECTOR.home.item,
+    config: SELECTOR.home,
     env,
     page
   });

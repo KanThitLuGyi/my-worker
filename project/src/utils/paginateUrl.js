@@ -1,7 +1,12 @@
 export function paginateUrl(baseUrl, page = 1) {
-  if (page <= 1) return baseUrl;
-if(baseUrl.endsWith('/')) {
-    return `${baseUrl}${page}`;
+  if (!baseUrl) {
+    throw new Error("paginateUrl: baseUrl required");
   }
-  return `${baseUrl}/${page}`;
+
+  if (!page || page <= 1) return baseUrl;
+
+  // xhamster uses /pageNumber
+  return baseUrl.endsWith("/")
+    ? `${baseUrl}${page}`
+    : `${baseUrl}/${page}`;
 }

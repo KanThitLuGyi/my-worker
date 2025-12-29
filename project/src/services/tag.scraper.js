@@ -8,39 +8,46 @@ import { getCache, setCache } from "../cache/kv.js";
 
 const TAG_TTL = 21600; // 6 hours
 
-// ✅ TAG LIST (CACHED)
 export async function scrapeTags({ env }) {
   const cacheKey = "scrape:tags:list";
-
   const cached = await getCache(cacheKey, env);
   if (cached) return cached;
 
   await rateLimit();
 
-  const html = await fetchHtml(SELECTOR.tag.url);
+  const html = await fetchHtml("https://xhamster.com/categories");
   const $ = cheerio.load(html);
+  console.log("Scraping tags list...");
 
   const tags = [];
-  $(SELECTOR.tag.item).each((_, el) => {
+
+  $(".items .item a[data-role='tag-link']").each((_, el) => {
     const href = $(el).attr("href");
     const title = $(el).text().trim();
 
-    if (href) {
-      tags.push({
-        title,
-        url: href
-      });
-    }
+    if (!href) return;
+
+    tags.push({
+      title,
+      url: href.startsWith("http")
+        ? href
+        : `https://xhamster.com${href}`
+    });
   });
 
-  if (tags.length > 0) {
+  console.log("TAGS FOUND:", tags.length);
+
+  if (tags.length) {
     await setCache(cacheKey, tags, env, TAG_TTL);
   }
 
   return tags;
 }
 
-// ✅ TAG SECTION (ALREADY CACHED via generic.scraper.js)
+
+// =======================
+// TAG VIDEOS (CHILD)
+// =======================
 export function scrapeTagSection({ tagUrl, page, env }) {
   if (!tagUrl) {
     throw new Error("tagUrl is required");
@@ -48,7 +55,7 @@ export function scrapeTagSection({ tagUrl, page, env }) {
 
   return scrapeList({
     url: paginateUrl(tagUrl, page),
-    selector: SELECTOR.tag.sectionItem,
+    config: SELECTOR.tag.section,
     env,
     page
   });

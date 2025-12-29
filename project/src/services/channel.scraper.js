@@ -2,19 +2,29 @@ import { SELECTOR } from "../config/selector.js";
 import { paginateUrl } from "../utils/paginateUrl.js";
 import { scrapeList } from "./generic.scraper.js";
 
-export function scrapeChannels({ page, env }) {
+// =======================
+// CHANNEL LIST (parent)
+// =======================
+export function scrapeChannels({ page = 1, env }) {
   return scrapeList({
     url: paginateUrl(SELECTOR.channel.url, page),
-    selector: SELECTOR.channel.item,
+    config: SELECTOR.channel,
     env,
     page
   });
 }
 
-export function scrapeChannelSection({ channelUrl, page, env }) {
+// =======================
+// CHANNEL VIDEOS (child)
+// =======================
+export function scrapeChannelSection({ channelUrl, page = 1, env }) {
+  if (!channelUrl) {
+    throw new Error("channelUrl is required");
+  }
+
   return scrapeList({
     url: paginateUrl(channelUrl, page),
-    selector: SELECTOR.channel.sectionItem,
+    config: SELECTOR.channel.section,
     env,
     page
   });

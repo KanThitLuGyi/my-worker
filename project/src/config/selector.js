@@ -1,25 +1,53 @@
 export const SELECTOR = {
   home: {
     url: "https://xhamster.com/best/weekly",
-    item: ".thumb-list__item"
+    list: ".thumb-list__item",
+    title: { selector: "img", attr: "alt" },
+    img: { selector: "img", attr: "src" },
+    link: { selector: "a", attr: "href" }
   },
 
   model: {
     url: "https://xhamster.com/pornstars",
-    item: ".root-4fca8",
-    sectionItem: ".thumb-list__item"
+    list: ".root-4fca8",
+    title: { selector: "img",attr: "alt" },
+    img: { selector: "img", attr: "src" },
+    link: { selector: "a", attr: "href" },
+
+    section: {
+      list: ".thumb-list__item",
+      title: { selector: "img", attr: "alt" },
+      img: { selector: "img", attr: "src" },
+      link: { selector: "a", attr: "href" }
+    }
   },
 
   channel: {
     url: "https://xhamster.com/channels",
-    item: ".list-ddffe > .root-02a1b",
-    sectionItem: ".thumb-list > .thumb-list__item"
+    list: ".root-02a1b",
+    title: { selector: "img", attr: "alt" },
+    img: { selector: "img", attr: "src" },
+    link: { selector: "a", attr: "href" },
+
+    section: {
+      list: ".thumb-list__item",
+      title: { selector: "img", attr: "alt" },
+      img: { selector: "img", attr: "src" },
+      link: { selector: "a", attr: "href" }
+    }
   },
 
   tag: {
     url: "https://xhamster.com/categories",
-    item: ".item a",
-    sectionItem: ".thumb-list > .thumb-list__item"
-  },
+    list: ".items .item a[data-role='tag-link']",
+    title: { selector: "span", text: true },
+    link: { attr: "href" },
 
+    section: {
+      list: ".thumb-list > .thumb-list__item",
+      title: { selector: "img", attr: "alt" },
+      img: { selector: "img", attr: "src" },
+      link: { selector: "a", attr: "href" }
+    }
+  }
 };

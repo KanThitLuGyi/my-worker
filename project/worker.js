@@ -3,6 +3,8 @@ import { scrapeModels, scrapeModelSection } from "./src/services/model.scraper.j
 import { scrapeChannels, scrapeChannelSection } from "./src/services/channel.scraper.js";
 import { scrapeTags, scrapeTagSection } from "./src/services/tag.scraper.js";
 import { json } from "./src/utils/response.js";
+import { getWatchM3U8 } from "./src/services/watch.m3u8.service.js";
+
 
 
 function edgeCacheJson(req, data, ttl = 300) {
@@ -15,7 +17,7 @@ function edgeCacheJson(req, data, ttl = 300) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env,ctx) {
     if (req.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -38,6 +40,7 @@ export default {
     }
     const url = new URL(req.url);
     const page = Number(url.searchParams.get("page") || 1);
+    const target = url.searchParams.get("url");
 
 
     if (url.pathname === "/home") {
@@ -89,15 +92,25 @@ export default {
       const data = await scrapeTagSection({ tagUrl, page, env });
       return edgeCacheJson(req, data, 300);
     }
+     if(url.pathname ==="/watch"){
+      if(!target){
+        return new Response("Bad Request", { status: 400 });
+      
+      }
+      return await getWatchM3U8({ target, ctx});
+     }
+    
 
     return new Response("Not Found", { status: 404 });
   },
+  
 
 
   async scheduled(event, env, ctx) {
     ctx.waitUntil(preloadCache(env));
   }
 };
+
 
 async function preloadCache(env) {
   console.log("Cron started: preload cache");

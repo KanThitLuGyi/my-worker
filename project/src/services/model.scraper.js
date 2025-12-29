@@ -2,19 +2,29 @@ import { SELECTOR } from "../config/selector.js";
 import { paginateUrl } from "../utils/paginateUrl.js";
 import { scrapeList } from "./generic.scraper.js";
 
-export function scrapeModels({ page, env }) {
+// =======================
+// MODEL LIST (parent)
+// =======================
+export function scrapeModels({ page = 1, env }) {
   return scrapeList({
     url: paginateUrl(SELECTOR.model.url, page),
-    selector: SELECTOR.model.item,
+    config: SELECTOR.model,
     env,
     page
   });
 }
 
-export function scrapeModelSection({ modelUrl, page, env }) {
+// =======================
+// MODEL VIDEOS (child)
+// =======================
+export function scrapeModelSection({ modelUrl, page = 1, env }) {
+  if (!modelUrl) {
+    throw new Error("modelUrl is required");
+  }
+
   return scrapeList({
     url: paginateUrl(modelUrl, page),
-    selector: SELECTOR.model.sectionItem,
+    config: SELECTOR.model.section,
     env,
     page
   });
