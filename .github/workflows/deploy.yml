@@ -24,7 +24,7 @@ jobs:
         working-directory: project
 
       - name: Deploy Worker
-        run: npx wrangler@4 deploy
+        run: npx wrangler@4.47.0 deploy
         working-directory: project
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
