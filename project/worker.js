@@ -29,7 +29,7 @@ export default {
       });
     }
 
-    const apiKey = req.headers.get("x-api-key");
+   /* const apiKey = req.headers.get("x-api-key");
     if (!apiKey || apiKey !== env.API_KEY) {
       return new Response("Unauthorized", {
         status: 401,
@@ -37,7 +37,7 @@ export default {
           "Access-Control-Allow-Origin": "*"
         }
       });
-    }
+    }*/
     const url = new URL(req.url);
     const page = Number(url.searchParams.get("page") || 1);
     const target = url.searchParams.get("url");
