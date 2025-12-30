@@ -3,6 +3,68 @@ import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
 
+
+function normalizeImgUrl(src) {
+  if (!src) return null;
+
+  if (src.startsWith("http")) return src;
+
+  if (
+    src.startsWith("webp/") ||
+    src.startsWith("jpg/") ||
+    src.startsWith("png/")
+  ) {
+    return `https://ic-vt-nss.xhcdn.com/${src}`;
+  }
+
+  return src;
+}
+
+function extractSize(url) {
+  const match = url?.match(/(\d{2,4})x(\d{2,4})/);
+  if (!match) return null;
+
+  return {
+    w: parseInt(match[1], 10),
+    h: parseInt(match[2], 10)
+  };
+}
+
+function upgradeIfTooSmall(url, minW = 640, minH = 360) {
+  const size = extractSize(url);
+
+  if (!size) return url;
+
+
+  if (size.w >= minW && size.h >= minH) {
+    return url;
+  }
+
+
+  return url.replace(/\d{2,4}x\d{2,4}/, "1280x720");
+}
+
+function getSmartImg($img) {
+  if (!$img || !$img.length) return null;
+
+  let src =
+    $img.attr("src") ||
+    $img.attr("data-src");
+
+  if (!src) {
+    const srcset = $img.attr("srcset");
+    if (srcset) {
+      src = srcset.split(",").pop().trim().split(" ")[0];
+    }
+  }
+
+  if (!src) return null;
+
+  src = normalizeImgUrl(src);
+  return upgradeIfTooSmall(src);
+}
+
+
 export async function scrapeList({
   url,
   config,
@@ -35,8 +97,8 @@ export async function scrapeList({
       : "";
 
     const img = config.img
-      ? node.find(config.img.selector).attr(config.img.attr)
-      : node.find(config.img.selector).attr("data-src");
+      ? getSmartImg(node.find(config.img.selector))
+      : null;
 
     let href = config.link
       ? config.link.selector
@@ -50,7 +112,11 @@ export async function scrapeList({
       href = `https://xhamster.com${href}`;
     }
 
-    list.push({ title, img, url: href });
+    list.push({
+      title,
+      img,
+      url: href
+    });
   });
 
   if (list.length) {
@@ -59,3 +125,4 @@ export async function scrapeList({
 
   return list;
 }
+ 
