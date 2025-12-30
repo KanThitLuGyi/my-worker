@@ -2,13 +2,15 @@ import * as cheerio from "cheerio";
 import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
+import {
+  normalizeTitle,
+  normalizeImage,
+  normalizeUrl,
+  extractId,
+} from "./normalizer.js";
 
-export async function scrapeList({
-  url,
-  config,
-  env,
-  page = 1
-}) {
+
+export async function scrapeList({ url, config, env, page = 1 }) {
   if (!config?.list) {
     throw new Error("scrapeList: missing list selector");
   }
@@ -30,7 +32,7 @@ export async function scrapeList({
 
     const title = config.title
       ? config.title.text
-        ? node.find(config.title.selector).text().trim()
+        ? node.find(config.title.selector).text()
         : node.find(config.title.selector).attr(config.title.attr)
       : "";
 
@@ -50,12 +52,23 @@ export async function scrapeList({
       href = `https://xhamster.com${href}`;
     }
 
-    list.push({ title, img, url: href });
+ list.push({
+      title: normalizeTitle(title),
+      img: normalizeImage(img),
+      url: normalizeUrl(href),
+    });
   });
 
-  if (list.length) {
-    await setCache(cacheKey, list, env, ttl);
+  const seen = new Set();
+  const normalizedList = list.filter(item => {
+    if (!item.url || seen.has(item.url)) return false;
+    seen.add(item.url);
+    return true;
+  });
+
+  if (normalizedList.length) {
+    await setCache(cacheKey, normalizedList, env, ttl);
   }
 
-  return list;
+  return normalizedList;
 }
