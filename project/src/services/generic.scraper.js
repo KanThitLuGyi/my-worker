@@ -20,29 +20,27 @@ function normalizeImgUrl(src) {
   return src;
 }
 
-function extractSize(url) {
-  const match = url?.match(/(\d{2,4})x(\d{2,4})/);
-  if (!match) return null;
-
-  return {
-    w: parseInt(match[1], 10),
-    h: parseInt(match[2], 10)
-  };
-}
 
 function upgradeIfTooSmall(url, minW = 640, minH = 360) {
-  const size = extractSize(url);
+  if (!url) return url;
 
-  if (!size) return url;
+  // Remove forced tiny resize
+  url = url.replace(/s\(w:\d+,h:\d+\),?/g, "");
 
+  const match = url.match(/(\d{2,4})x(\d{2,4})/);
 
-  if (size.w >= minW && size.h >= minH) {
+  if (!match) return url;
+
+  const w = parseInt(match[1], 10);
+  const h = parseInt(match[2], 10);
+
+  if (w >= minW && h >= minH) {
     return url;
   }
 
-
   return url.replace(/\d{2,4}x\d{2,4}/, "1280x720");
 }
+
 
 function getSmartImg($img) {
   if (!$img || !$img.length) return null;

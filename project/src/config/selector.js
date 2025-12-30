@@ -13,9 +13,9 @@ export const SELECTOR = {
   model: {
     url: "https://xhamster.com/pornstars",
     list: ".root-4fca8",
-    title: { selector: ".primary-8643e", text: true },
+    title: { selector: "img", attr: "alt" },
     img: {
-      selector: "img.thumb-image-container__image",
+      selector: "img",
       attr: "src"
     },
     link: { selector: "a", attr: "href" },
@@ -24,7 +24,7 @@ export const SELECTOR = {
       list: ".thumb-list__item",
       title: { selector: "img", attr: "alt" },
       img: {
-        selector: "img.thumb-image-container__image",
+        selector: "img",
         attr: "src"
       },
       link: { selector: "a[data-role='thumb-link']", attr: "href" }
@@ -34,9 +34,9 @@ export const SELECTOR = {
   channel: {
     url: "https://xhamster.com/channels",
     list: ".root-02a1b",
-    title: { selector: ".primary-8643e", text: true },
+    title: { selector: "img", attr: "alt" },
     img: {
-      selector: "img.thumb-image-container__image",
+      selector: "img",
       attr: "src"
     },
     link: { selector: "a", attr: "href" },
@@ -45,7 +45,7 @@ export const SELECTOR = {
       list: ".thumb-list__item",
       title: { selector: "img", attr: "alt" },
       img: {
-        selector: "img.thumb-image-container__image",
+        selector: "img",
         attr: "src"
       },
       link: { selector: "a[data-role='thumb-link']", attr: "href" }
@@ -62,7 +62,7 @@ export const SELECTOR = {
       list: ".thumb-list > .thumb-list__item",
       title: { selector: "img", attr: "alt" },
       img: {
-        selector: "img.thumb-image-container__image",
+        selector: "img",
         attr: "src"
       },
       link: { selector: "a[data-role='thumb-link']", attr: "href" }
