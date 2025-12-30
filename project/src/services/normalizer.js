@@ -1,22 +1,22 @@
-export function normalizeTitle(title) {
-  return title?.replace(/\s+/g, " ").trim() ?? "";
-}
+export class Normalizer {
+  static title(title) {
+    return title ? title.replace(/\s+/g, " ").trim() : null;
+  }
 
-export function normalizeImage(url) {
-  if (!url) return null;
+  static url(href, base) {
+    if (!href) return null;
+    return href.startsWith("http") ? href : new URL(href, base).href;
+  }
 
-  return url
-    .replace(/b\(\d+\),?/g, "")
-    .replace(/s\(w:\d+,h:\d+\)/g, "s(w:1280,h:720)")
-    .replace(/\/(\d+x\d+)\./, "/1280x720.");
-}
+  static image(url) {
+    if (!url) return null;
 
-export function normalizeUrl(url) {
-  if (!url) return null;
-  return url.startsWith("//") ? "https:" + url : url;
-}
+    return url
 
-export function extractId(url) {
-  const m = url?.match(/-([a-zA-Z0-9]+)$/);
-  return m ? m[1] : url;
+      .replace(/\/16x9\./, "/1280x720.")
+
+      .replace(/\/\d+x\d+\./, "/1280x720.")
+
+      .replace(/s\(w:\d+,h:\d+\),?/g, "s(w:1280,h:720),");
+  }
 }

@@ -2,17 +2,16 @@ import * as cheerio from "cheerio";
 import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
-import {
-  normalizeTitle,
-  normalizeImage,
-  normalizeUrl,
-  extractId,
-} from "./normalizer.js";
+import { Extractor } from "./extractor.js";
 
-
-export async function scrapeList({ url, config, env, page = 1 }) {
+export async function scrapeList({
+  url,
+  config,
+  env,
+  page = 1
+}) {
   if (!config?.list) {
-    throw new Error("scrapeList: missing list selector");
+    throw new Error("generic.scraper: missing list selector");
   }
 
   const ttl = page <= 3 ? 21600 : 3600;
@@ -25,50 +24,26 @@ export async function scrapeList({ url, config, env, page = 1 }) {
 
   const html = await fetchHtml(url);
   const $ = cheerio.load(html);
-  const list = [];
+
+  const result = [];
 
   $(config.list).each((_, el) => {
     const node = $(el);
 
-    const title = config.title
-      ? config.title.text
-        ? node.find(config.title.selector).text()
-        : node.find(config.title.selector).attr(config.title.attr)
-      : "";
+    const item = {
+      title: Extractor.title(node, config),
+      img: Extractor.image(node, config),
+      url: Extractor.link(node, config, url)
+    };
 
-    const img = config.img
-      ? node.find(config.img.selector).attr(config.img.attr)
-      : null;
+    if (!item.url) return;
 
-    let href = config.link
-      ? config.link.selector
-        ? node.find(config.link.selector).attr(config.link.attr)
-        : node.attr(config.link.attr)
-      : null;
-
-    if (!href) return;
-
-    if (!href.startsWith("http")) {
-      href = `https://xhamster.com${href}`;
-    }
-
- list.push({
-      title: normalizeTitle(title),
-      img: normalizeImage(img),
-      url: normalizeUrl(href),
-    });
+    result.push(item);
   });
 
-  const seen = new Set();
-  const normalizedList = list.filter(item => {
-    if (!item.url || seen.has(item.url)) return false;
-    seen.add(item.url);
-    return true;
-  });
-
-  if (normalizedList.length) {
-    await setCache(cacheKey, normalizedList, env, ttl);
+  if (result.length) {
+    await setCache(cacheKey, result, env, ttl);
   }
 
-  return normalizedList;
+  return result;
 }
