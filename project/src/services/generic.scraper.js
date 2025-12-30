@@ -2,7 +2,6 @@ import * as cheerio from "cheerio";
 import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
-import { Extractor } from "./extractor.js";
 
 export async function scrapeList({
   url,
@@ -11,7 +10,7 @@ export async function scrapeList({
   page = 1
 }) {
   if (!config?.list) {
-    throw new Error("generic.scraper: missing list selector");
+    throw new Error("scrapeList: missing list selector");
   }
 
   const ttl = page <= 3 ? 21600 : 3600;
@@ -24,26 +23,39 @@ export async function scrapeList({
 
   const html = await fetchHtml(url);
   const $ = cheerio.load(html);
-
-  const result = [];
+  const list = [];
 
   $(config.list).each((_, el) => {
     const node = $(el);
 
-    const item = {
-      title: Extractor.title(node, config),
-      img: Extractor.image(node, config),
-      url: Extractor.link(node, config, url)
-    };
+    const title = config.title
+      ? config.title.text
+        ? node.find(config.title.selector).text().trim()
+        : node.find(config.title.selector).attr(config.title.attr)
+      : "";
 
-    if (!item.url) return;
+    const img = config.img
+      ? node.find(config.img.selector).attr(config.img.attr)
+      : node.find(config.img.selector).attr("data-src");
 
-    result.push(item);
+    let href = config.link
+      ? config.link.selector
+        ? node.find(config.link.selector).attr(config.link.attr)
+        : node.attr(config.link.attr)
+      : null;
+
+    if (!href) return;
+
+    if (!href.startsWith("http")) {
+      href = `https://xhamster.com${href}`;
+    }
+
+    list.push({ title, img, url: href });
   });
 
-  if (result.length) {
-    await setCache(cacheKey, result, env, ttl);
+  if (list.length) {
+    await setCache(cacheKey, list, env, ttl);
   }
 
-  return result;
+  return list;
 }
