@@ -3,12 +3,15 @@ import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
 
+/* ================= IMAGE HELPERS ================= */
 
 function normalizeImgUrl(src) {
   if (!src) return null;
 
+  // absolute
   if (src.startsWith("http")) return src;
 
+  // relative video thumbnails
   if (
     src.startsWith("webp/") ||
     src.startsWith("jpg/") ||
@@ -20,27 +23,33 @@ function normalizeImgUrl(src) {
   return src;
 }
 
+function canResizeImage(url) {
+  return (
+    url?.includes("ic-vt-nss.xhcdn.com") ||
+    url?.includes("thumb-v7.xhcdn.com")
+  );
+}
 
 function upgradeIfTooSmall(url, minW = 640, minH = 360) {
   if (!url) return url;
 
-  // Remove forced tiny resize
+  // remove forced tiny resize (s(w:16,h:9))
   url = url.replace(/s\(w:\d+,h:\d+\),?/g, "");
 
   const match = url.match(/(\d{2,4})x(\d{2,4})/);
-
   if (!match) return url;
 
   const w = parseInt(match[1], 10);
   const h = parseInt(match[2], 10);
 
+  // already large enough
   if (w >= minW && h >= minH) {
     return url;
   }
 
+  // upgrade safely
   return url.replace(/\d{2,4}x\d{2,4}/, "1280x720");
 }
-
 
 function getSmartImg($img) {
   if (!$img || !$img.length) return null;
@@ -49,6 +58,7 @@ function getSmartImg($img) {
     $img.attr("src") ||
     $img.attr("data-src");
 
+  // fallback to srcset (best quality)
   if (!src) {
     const srcset = $img.attr("srcset");
     if (srcset) {
@@ -59,9 +69,17 @@ function getSmartImg($img) {
   if (!src) return null;
 
   src = normalizeImgUrl(src);
-  return upgradeIfTooSmall(src);
+
+  // resize ONLY resizable CDNs (video thumbs)
+  if (canResizeImage(src)) {
+    return upgradeIfTooSmall(src);
+  }
+
+  // avatar or protected image → return as-is
+  return src;
 }
 
+/* ================= MAIN SCRAPER ================= */
 
 export async function scrapeList({
   url,
@@ -74,7 +92,7 @@ export async function scrapeList({
   }
 
   const ttl = page <= 3 ? 21600 : 3600;
-  const cacheKey = `scrape:${url}:p${page}`;
+  const cacheKey = `scrape:v2:${url}:p${page}`;
 
   const cached = await getCache(cacheKey, env);
   if (cached) return cached;
@@ -123,4 +141,3 @@ export async function scrapeList({
 
   return list;
 }
- 
