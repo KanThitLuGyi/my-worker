@@ -9,7 +9,7 @@ export function paginateUrl(baseUrl, page = 1) {
   // xhamster uses /pageNumber
   return baseUrl.endsWith("/")
     ? `${baseUrl}${page}`
-    : `${baseUrl}/${page}`;
+    : `${baseUrl}/recent/${page}/`;
 
   return `${baseUrl}/${page}`;
 

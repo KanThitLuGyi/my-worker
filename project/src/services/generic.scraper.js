@@ -3,84 +3,6 @@ import { fetchHtml } from "../utils/fetchHtml.js";
 import { rateLimit } from "../utils/rateLimit.js";
 import { getCache, setCache } from "../cache/kv.js";
 
-/* ================= IMAGE HELPERS ================= */
-
-function normalizeImgUrl(src) {
-  if (!src) return null;
-
-  // absolute
-  if (src.startsWith("http")) return src;
-
-  // relative video thumbnails
-  if (
-    src.startsWith("webp/") ||
-    src.startsWith("jpg/") ||
-    src.startsWith("png/")
-  ) {
-    return `https://ic-vt-nss.xhcdn.com/${src}`;
-  }
-
-  return src;
-}
-
-function canResizeImage(url) {
-  return (
-    url?.includes("ic-vt-nss.xhcdn.com") ||
-    url?.includes("thumb-v7.xhcdn.com")
-  );
-}
-
-function upgradeIfTooSmall(url, minW = 640, minH = 360) {
-  if (!url) return url;
-
-  // remove forced tiny resize (s(w:16,h:9))
-  url = url.replace(/s\(w:\d+,h:\d+\),?/g, "");
-
-  const match = url.match(/(\d{2,4})x(\d{2,4})/);
-  if (!match) return url;
-
-  const w = parseInt(match[1], 10);
-  const h = parseInt(match[2], 10);
-
-  // already large enough
-  if (w >= minW && h >= minH) {
-    return url;
-  }
-
-  // upgrade safely
-  return url.replace(/\d{2,4}x\d{2,4}/, "1280x720");
-}
-
-function getSmartImg($img) {
-  if (!$img || !$img.length) return null;
-
-  let src =
-    $img.attr("src") ||
-    $img.attr("data-src");
-
-  // fallback to srcset (best quality)
-  if (!src) {
-    const srcset = $img.attr("srcset");
-    if (srcset) {
-      src = srcset.split(",").pop().trim().split(" ")[0];
-    }
-  }
-
-  if (!src) return null;
-
-  src = normalizeImgUrl(src);
-
-  // resize ONLY resizable CDNs (video thumbs)
-  if (canResizeImage(src)) {
-    return upgradeIfTooSmall(src);
-  }
-
-  // avatar or protected image → return as-is
-  return src;
-}
-
-/* ================= MAIN SCRAPER ================= */
-
 export async function scrapeList({
   url,
   config,
@@ -91,12 +13,33 @@ export async function scrapeList({
     throw new Error("scrapeList: missing list selector");
   }
 
-  const ttl = page <= 3 ? 21600 : 3600;
-  const cacheKey = `scrape:v2:${url}:p${page}`;
+  // Environment အလိုက် cache TTL သတ်မှတ်ခြင်း
+  const isDev = env.ENVIRONMENT === 'dev';
+  const cacheEnabled = env.CACHE_ENABLED === 'true';
+  
+  // Dev mode မှာ cache မလုပ်စေချင်ဘူး
+  if (isDev || !cacheEnabled) {
+    console.log(`[${env.ENVIRONMENT}] Cache disabled for: ${url} page ${page}`);
+    return await fetchAndScrapeWithoutCache({ url, config, page });
+  }
 
+  // Production mode မှာပဲ cache သုံးမယ်
+  // Cache TTL ကို environment variable ကနေ ဖတ်မယ်
+  const defaultTtl = env.CACHE_TTL ? parseInt(env.CACHE_TTL) : 3600;
+  const ttl = page <= 3 ? defaultTtl * 6 : defaultTtl; // First 3 pages cache longer
+  
+  // Cache key ထဲမှာ environment ပါအောင် ထည့်ပေးခြင်း
+  const cacheKey = `scrape:${env.ENVIRONMENT}:${url}:p${page}`;
+
+  // Cache ထဲမှာ ရှိမရှိ စစ်ဆေးခြင်း
   const cached = await getCache(cacheKey, env);
-  if (cached) return cached;
+  if (cached) {
+    console.log(`[${env.ENVIRONMENT}] Cache hit for: ${url} page ${page}`);
+    return cached;
+  }
 
+  console.log(`[${env.ENVIRONMENT}] Cache miss for: ${url} page ${page}`);
+  
   await rateLimit();
 
   const html = await fetchHtml(url);
@@ -106,16 +49,36 @@ export async function scrapeList({
   $(config.list).each((_, el) => {
     const node = $(el);
 
+    /* ---------- TITLE ---------- */
     const title = config.title
       ? config.title.text
-        ? node.find(config.title.selector).text().trim()
+        ? node
+            .find(config.title.selector)
+            .clone()
+            .children()
+            .remove()
+            .end()
+            .text()
+            .trim()
         : node.find(config.title.selector).attr(config.title.attr)
       : "";
 
-    const img = config.img
-      ? getSmartImg(node.find(config.img.selector))
-      : null;
+    /* ---------- IMAGE ---------- */
+    let img = null;
+    if (config.img) {
+      const imgEl = config.img.selector
+        ? node.find(config.img.selector)
+        : node;
 
+      img =
+        imgEl.attr(config.img.attr) ||
+        imgEl.find("img").attr("src")||
+        imgEl.attr("data-lazy") ||
+        imgEl.attr("srcset")?.split(" ")[0] ||
+        null;
+    }
+
+    /* ---------- LINK ---------- */
     let href = config.link
       ? config.link.selector
         ? node.find(config.link.selector).attr(config.link.attr)
@@ -125,7 +88,7 @@ export async function scrapeList({
     if (!href) return;
 
     if (!href.startsWith("http")) {
-      href = `https://xhamster.com${href}`;
+      href = `https://www.freepornvideo.sex${href}`;
     }
 
     list.push({
@@ -137,7 +100,70 @@ export async function scrapeList({
 
   if (list.length) {
     await setCache(cacheKey, list, env, ttl);
+    console.log(`[${env.ENVIRONMENT}] Cached: ${url} page ${page} (TTL: ${ttl}s)`);
   }
 
   return list;
+}
+
+// Dev mode အတွက် cache မသုံးတဲ့ function
+async function fetchAndScrapeWithoutCache({ url, config, page }) {
+  console.log(`Fetching without cache: ${url} page ${page}`);
+  
+  await rateLimit();
+  const html = await fetchHtml(url);
+  const $ = cheerio.load(html);
+  const list = [];
+
+  $(config.list).each((_, el) => {
+    const node = $(el);
+
+    const title = config.title
+      ? config.title.text
+        ? node
+            .find(config.title.selector)
+            .clone()
+            .children()
+            .remove()
+            .end()
+            .text()
+            .trim()
+        : node.find(config.title.selector).attr(config.title.attr)
+      : "";
+
+    let img = null;
+    if (config.img) {
+      const imgEl = config.img.selector
+        ? node.find(config.img.selector)
+        : node;
+
+      img =
+        imgEl.attr(config.img.attr) ||
+        imgEl.find("img").attr("src")||
+        imgEl.attr("data-lazy") ||
+        imgEl.attr("srcset")?.split(" ")[0] ||
+        null;
+    }
+
+    let href = config.link
+      ? config.link.selector
+        ? node.find(config.link.selector).attr(config.link.attr)
+        : node.attr(config.link.attr)
+      : null;
+
+    if (!href) return;
+
+    if (!href.startsWith("http")) {
+      href = `https://www.freepornvideo.sex${href}`;
+    }
+
+    list.push({
+      title,
+      img,
+      url: href
+    });
+  });
+
+  return list;
+  
 }

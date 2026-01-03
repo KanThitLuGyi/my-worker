@@ -1,13 +1,13 @@
 export const SELECTOR = {
   home: {
-    url: "https://xhamster.com/best/weekly",
-    list: ".thumb-list__item",
-    title: { selector: "img", attr: "alt" },
+    url: "https://www.freepornvideo.sex",
+    list: ".item",
+    title: { selector: "a", attr: "title" },
     img: {
-      selector: "img.thumb-image-container__image",
-      attr: "src"
+      selector: ".img",
+      attr: "data-original"
     },
-    link: { selector: "a[data-role='thumb-link']", attr: "href" }
+    link: { selector: "a", attr: "href" }
   },
 
   model: {

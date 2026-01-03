@@ -15,7 +15,7 @@ export async function scrapeM3u8(pageUrl) {
     const urls = html.match(/https?:\/\/[^'"]+/g) || [];
 
     // Prefer mp4
-    const mp4 = urls.find(u => u.includes(".mp4"));
+    const mp4 = urls.find(u => u.includes("/?br"));
     if (mp4) return mp4;
 
     return null;
