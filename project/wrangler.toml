@@ -1,6 +1,7 @@
 name = "your-worker-name"
 main = "worker.js"
 compatibility_date = "2024-01-01"
+account_id = "fe1aaedd3eab92e69d17e708278d06db"
 
 [vars]
 ENVIRONMENT = "dev"
