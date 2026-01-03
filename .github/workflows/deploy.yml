@@ -16,16 +16,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Check Node version
-        run: node -v
-
       - name: Install dependencies
         run: npm install
-        working-directory: project
+        working-directory: project # Make sure this path is correct
 
       - name: Deploy Worker
-        run: npx wrangler@4.47.0 deploy
+        run: npx wrangler deploy --env production # FIX 2: Specify the environment
         working-directory: project
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
+          # FIX 1: Use 'secrets' for Account ID, not 'vars'
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

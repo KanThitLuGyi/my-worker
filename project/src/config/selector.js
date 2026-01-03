@@ -5,7 +5,7 @@ export const SELECTOR = {
     title: { selector: "a", attr: "title" },
     img: {
       selector: ".img",
-      attr: "data-original"
+      attr: "src"
     },
     link: { selector: "a", attr: "href" }
   },
