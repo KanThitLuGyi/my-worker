@@ -3,7 +3,7 @@ main = "worker.js"
 compatibility_date = "2024-01-01"
 account_id = "fe1aaedd3eab92e69d17e708278d06db"
 
-# Top-level binding for default/`dev` environment
+# ✅ DEFINE KV ONLY ONCE
 [[kv_namespaces]]
 binding = "CACHE"
 id = "f4596cfee99a4c099f7031bf7dc1e8f2"
@@ -15,14 +15,8 @@ CACHE_ENABLED = "false"
 CACHE_TTL = "300"
 CACHE_TTL_M3U8 = "480"
 
-# Production Environment
 [env.production]
 name = "your-worker-production"
-
-# 🔁 KV BINDING MUST BE EXPLICITLY ADDED HERE
-[[kv_namespaces]]
-binding = "CACHE"
-id = "f4596cfee99a4c099f7031bf7dc1e8f2" # Same ID as above
 
 [env.production.vars]
 ENVIRONMENT = "production"
@@ -30,10 +24,8 @@ CACHE_ENABLED = "true"
 CACHE_TTL = "1800"
 CACHE_TTL_M3U8 = "480"
 
-# Development Environment
 [env.development]
 name = "your-worker-dev"
-# Binding here is optional; can inherit top-level for `--env development`
 
 [env.development.vars]
 ENVIRONMENT = "dev"
