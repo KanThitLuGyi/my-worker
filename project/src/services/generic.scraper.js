@@ -43,6 +43,10 @@ export async function scrapeList({
   await rateLimit();
 
   const html = await fetchHtml(url);
+  if (!html) {
+  console.warn(`No HTML returned for ${url}`);
+  return [];
+}
   const $ = cheerio.load(html);
   const list = [];
 

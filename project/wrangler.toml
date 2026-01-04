@@ -3,32 +3,44 @@ main = "worker.js"
 compatibility_date = "2024-01-01"
 account_id = "fe1aaedd3eab92e69d17e708278d06db"
 
-# ✅ DEFINE KV ONLY ONCE
-[[kv_namespaces]]
-binding = "CACHE"
-id = "f4596cfee99a4c099f7031bf7dc1e8f2"
-preview_id = "3a9f52278dc6432d9780a6216d258e9a"
-
+# ─────────────────────────────────────
+# DEFAULT (used only if env not specified)
+# ─────────────────────────────────────
 [vars]
 ENVIRONMENT = "dev"
 CACHE_ENABLED = "false"
 CACHE_TTL = "300"
 CACHE_TTL_M3U8 = "480"
 
-[env.production]
-name = "your-worker-production"
-
-[env.production.vars]
-ENVIRONMENT = "production"
-CACHE_ENABLED = "true"
-CACHE_TTL = "1800"
-CACHE_TTL_M3U8 = "480"
-
+# ─────────────────────────────────────
+# DEVELOPMENT
+# ─────────────────────────────────────
 [env.development]
 name = "your-worker-dev"
+
+[[env.development.kv_namespaces]]
+binding = "CACHE"
+id = "f4596cfee99a4c099f7031bf7dc1e8f2"
+preview_id = "3a9f52278dc6432d9780a6216d258e9a"
 
 [env.development.vars]
 ENVIRONMENT = "dev"
 CACHE_ENABLED = "false"
 CACHE_TTL = "60"
 CACHE_TTL_M3U8 = "0"
+
+# ─────────────────────────────────────
+# PRODUCTION
+# ─────────────────────────────────────
+[env.production]
+name = "your-worker-production"
+
+[[env.production.kv_namespaces]]
+binding = "CACHE"
+id = "f4596cfee99a4c099f7031bf7dc1e8f2"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+CACHE_ENABLED = "true"
+CACHE_TTL = "1800"
+CACHE_TTL_M3U8 = "480"

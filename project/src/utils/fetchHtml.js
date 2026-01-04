@@ -1,25 +1,32 @@
 export async function fetchHtml(url) {
   const referer = new URL(url).origin + "/";
 
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Accept": "text/html",
-      "Referer": referer
-    },
-    cf: {
-      cacheTtl: 0,
-      cacheEverything: false
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "text/html",
+        "Referer": referer,
+      },
+      cf: {
+        cacheTtl: 0,
+        cacheEverything: false,
+      },
+    });
+
+    // 🚫 DO NOT THROW
+    if (!res.ok) {
+      console.warn(`Blocked ${res.status}: ${url}`);
+      return null;
     }
-  });
 
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} → ${url}`);
+    return await res.text();
+  } catch (err) {
+    console.error("fetchHtml error:", err.message);
+    return null; // ✅ NEVER crash worker
   }
-
-  return await res.text();
 }
 
 
