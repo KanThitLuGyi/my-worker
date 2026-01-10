@@ -43,8 +43,8 @@ export async function scrapeList({
   await rateLimit();
 
   const html = await fetchHtml(url);
-  if (!html) {
-  console.warn(`No HTML returned for ${url}`);
+
+if (typeof html !== "string") {
   return [];
 }
   const $ = cheerio.load(html);
@@ -80,6 +80,9 @@ export async function scrapeList({
         imgEl.attr("data-lazy") ||
         imgEl.attr("srcset")?.split(" ")[0] ||
         null;
+        if(!img.startsWith("http")){
+          img = `https:${img}`
+        }
     }
 
     /* ---------- LINK ---------- */
@@ -92,7 +95,7 @@ export async function scrapeList({
     if (!href) return;
 
     if (!href.startsWith("http")) {
-      href = `https://www.freepornvideo.sex${href}`;
+      href = `https://www.pornhat.com${href}`;
     }
 
     list.push({
@@ -147,6 +150,9 @@ async function fetchAndScrapeWithoutCache({ url, config, page }) {
         imgEl.attr("data-lazy") ||
         imgEl.attr("srcset")?.split(" ")[0] ||
         null;
+        if(!img.startsWith("http")){
+          img = `https:${img}`
+        }
     }
 
     let href = config.link
@@ -158,7 +164,7 @@ async function fetchAndScrapeWithoutCache({ url, config, page }) {
     if (!href) return;
 
     if (!href.startsWith("http")) {
-      href = `https://www.freepornvideo.sex${href}`;
+      href = `https://www.pornhat.com${href}`;
     }
 
     list.push({

@@ -8,7 +8,7 @@ export async function fetchHtml(url) {
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.9",
         "Accept": "text/html",
-        "Referer": referer,
+        "Referer":"https://www.pornhat.com/",
       },
       cf: {
         cacheTtl: 0,

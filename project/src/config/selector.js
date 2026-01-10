@@ -1,40 +1,40 @@
 export const SELECTOR = {
   home: {
-    url: "https://www.freepornvideo.sex",
-    list: ".item",
+    url: "https://www.pornhat.com",
+    list: ".thumb-video",
     title: { selector: "a", attr: "title" },
     img: {
-      selector: ".img",
-      attr: "src"
+      selector: "img",
+      attr: "data-original"
     },
     link: { selector: "a", attr: "href" }
   },
 
   model: {
-    url: "https://xhamster.com/pornstars",
-    list: ".root-4fca8",
-    title: { selector: "img", attr: "alt" },
+    url: "https://www.pornhat.com/models/",
+    list: ".thumb-ctr",
+    title: { selector: "a", attr: "title" },
     img: {
       selector: "img",
-      attr: "src"
+      attr: "data-original"
     },
     link: { selector: "a", attr: "href" },
 
     section: {
-      list: ".thumb-list__item",
-      title: { selector: "img", attr: "alt" },
+      list: ".thumb-video",
+      title: { selector: "a", attr: "title" },
       img: {
         selector: "img",
-        attr: "src"
+        attr: "data-original"
       },
-      link: { selector: "a[data-role='thumb-link']", attr: "href" }
+      link: { selector: "a", attr: "href" }
     }
   },
 
   channel: {
-    url: "https://xhamster.com/channels",
-    list: ".root-02a1b",
-    title: { selector: "img", attr: "alt" },
+    url: "https://www.pornhat.com/channels/",
+    list: ".thumb-ctr",
+    title: { selector: "a", attr: "title" },
     img: {
       selector: "img",
       attr: "src"
@@ -42,30 +42,30 @@ export const SELECTOR = {
     link: { selector: "a", attr: "href" },
 
     section: {
-      list: ".thumb-list__item",
-      title: { selector: "img", attr: "alt" },
+      list: ".thumb-video",
+      title: { selector: "a", attr: "title" },
       img: {
         selector: "img",
-        attr: "src"
+        attr: "data-original"
       },
-      link: { selector: "a[data-role='thumb-link']", attr: "href" }
+      link: { selector: "a", attr: "href" }
     }
   },
 
   tag: {
-    url: "https://xhamster.com/categories",
-    list: ".items .item a[data-role='tag-link']",
+    url: "https://www.pornhat.com/tags/",
+    list: ".tags-holder a.item",
     title: { selector: "span", text: true },
     link: { attr: "href" },
 
     section: {
-      list: ".thumb-list > .thumb-list__item",
-      title: { selector: "img", attr: "alt" },
+      list: ".thumb-video",
+      title: { selector: "a", attr: "title" },
       img: {
         selector: "img",
-        attr: "src"
+        attr: "data-original"
       },
-      link: { selector: "a[data-role='thumb-link']", attr: "href" }
+      link: { selector: "a", attr: "href" }
     }
   }
 };

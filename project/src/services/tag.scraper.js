@@ -15,13 +15,13 @@ export async function scrapeTags({ env }) {
 
   await rateLimit();
 
-  const html = await fetchHtml("https://xhamster.com/categories");
+  const html = await fetchHtml("https://www.pornhat.com/tags/");
   const $ = cheerio.load(html);
   console.log("Scraping tags list...");
 
   const tags = [];
 
-  $(".items .item a[data-role='tag-link']").each((_, el) => {
+  $(".tags-holder a.item").each((_, el) => {
     const href = $(el).attr("href");
     const title = $(el).text().trim();
 
@@ -31,7 +31,7 @@ export async function scrapeTags({ env }) {
       title,
       url: href.startsWith("http")
         ? href
-        : `https://xhamster.com${href}`
+        : `https://www.pornhat.com${href}`
     });
   });
 
